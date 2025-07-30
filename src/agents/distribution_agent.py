@@ -85,7 +85,7 @@ class DistributionAgent(BaseSupplyChainAgent):
         total_inventory = sum(self.current_inventory.values())
         
         # Warn if warehouse is getting full (90% capacity threshold)
-        if total_inventory > self.warehouse_capacity * 0.9:
+        if total_inventory > self.capacity * 0.9:
             logger.warning(f"{self.name} warehouse is {(total_inventory/self.warehouse_capacity)*100:.1f}% full")
         
         # Return detailed status information
@@ -95,9 +95,9 @@ class DistributionAgent(BaseSupplyChainAgent):
             "received_quantity": quantity,
             "current_inventory": self.current_inventory[material],
             "total_inventory": total_inventory,
-            "capacity_utilization_percent": round((total_inventory / self.warehouse_capacity) * 100, 1)
+            "capacity_utilization_percent": round((total_inventory / self.capacity) * 100, 1)
         }
-
+        
     def create_shipping_order(self, material: str, quantity: float, destination: str, delivery_zone: str) -> bool:
         """
         Create a new shipping order for a customer
@@ -325,7 +325,7 @@ class DistributionAgent(BaseSupplyChainAgent):
         
         # Calculate current warehouse metrics
         total_inventory = sum(self.current_inventory.values())
-        capacity_utilization = (total_inventory / self.warehouse_capacity) * 100 if self.warehouse_capacity else 0
+        capacity_utilization = (total_inventory / self.capacity) * 100 if self.capacity else 0
         
         # Calculate shipping performance metrics
         delivered_shipments = sum(1 for s in self.shipment_history if s.get("status") == "delivered")
