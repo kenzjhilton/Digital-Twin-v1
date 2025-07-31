@@ -8,12 +8,17 @@ This agent represents a mining operation that:
 4. Sends extracted materials to processing facilities
 """
 
+getcwd()
+
 import logging
 from base_agent import BaseSupplyChainAgent  # Importing the base class for supply chain agents
 from typing import Dict, List  # For type hinting
 from datetime import datetime, timedelta  # For date and time handling
 import random  # For simulating mining variability
+import os 
 
+getcwd = os.getcwd()  # Get the current working directory
+print(f"Current working directory: {getcwd}")
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
