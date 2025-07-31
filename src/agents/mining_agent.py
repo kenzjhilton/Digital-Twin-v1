@@ -8,8 +8,6 @@ This agent represents a mining operation that:
 4. Sends extracted materials to processing facilities
 """
 
-getcwd()
-
 import logging
 from base_agent import BaseSupplyChainAgent  # Importing the base class for supply chain agents
 from typing import Dict, List  # For type hinting
