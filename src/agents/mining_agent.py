@@ -1,4 +1,4 @@
-feature/agents
+
 """
 Mining Agent - Handles raw material extraction from mining operations
 
