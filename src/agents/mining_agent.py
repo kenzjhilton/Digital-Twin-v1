@@ -57,25 +57,21 @@ class MiningAgent(BaseSupplyChainAgent):
             "Storage Facilities": "Operational",
         }
         self.equipment_efficiency = 100.0  # Percentage efficiency
-        
         # Extraction tracking
         self.extraction_history: List[Dict]= []  # List to track extraction history
         self.daily_extraction_target: Dict[str, float] = self.extraction_rate * 24 # Daily extraction totals
         self.current_shift_extraction: float = 0.0 # Current shift extraction total
         self.total_extracted: float = 0.0  # Total extracted ore
         self.last_extraction_time: datetime = datetime.now() # Last extraction timestamp
-        
         # Ore quality and reserves tracking
         self.ore_reserves: Dict[str, float] = {}  # Remaining reserves by ore type
         self.ore_quality: Dict[str, float] = {}   # Quality grades by ore type
         self.extraction_costs: Dict[str, float] = {}  # Cost per ton by ore type
-        
         # Initialize ore reserves and quality
         for ore in self.ore_types:
             self.ore_reserves[ore] = random.uniform(1000, 5000) # Random reserves between 1000 and 5000 tons
             self.ore_quality[ore] = random.uniform(0.5, 1.0) # Random quality between 0.5 and 1.0
             self.extraction_costs[ore] = random.uniform(10, 50)  # Random cost per ton between $10 and $50
-        
         # Performance metrics
         self.operational_hours = 24.0 # Total operational hours
         self.downtime_hours = 8.0 # Scheduled downtime for maintenance
@@ -93,12 +89,10 @@ class MiningAgent(BaseSupplyChainAgent):
         self.maintenance_costs["Safety Equipment"] = random.uniform(500, 2000)  # Random cost between $500 and $2000
         self.maintenance_costs["Maintenance Equipment"] = random.uniform(500, 2000)  # Random cost between $500 and $2000  
         self.maintenance_costs["Storage Facilities"] = random.uniform(500, 2000)  # Random cost between $500 and $2000
-        
         # Material Output tracking - this will be used to track what materials are sent downstream
         self.pending_shipments: Dict[str, Dict] = {}  # Pending shipments by ore type 
         self.shipped_materials: List[Dict] = []       # History of materials sent downstream
         self.shipment_costs: Dict[str, float] = {}    # Costs associated with shipments
-        
         # Log the initialization
         self.created_at = datetime.now()  # When the agent was created
         self.updated_at = self.created_at
@@ -107,14 +101,11 @@ class MiningAgent(BaseSupplyChainAgent):
         logger.info(f"Initial ore reserves: {self.ore_reserves}")
         logger.info(f"Initial ore quality: {self.ore_quality}")
         logger.info(f"Initial extraction costs: {self.extraction_costs}")
-        
     def process_material(self, material: str = None, quantity: float = None):
         """
         Extract raw materials from the mine (this is the main mining operation)
-        
         Unlike other agents that receive materials, the mining agent CREATES materials
         by extracting them from the ground. This method simulates mining operations.
-        
         Args:
             material: Type of ore to extract (optional - if None, extracts based on availability)
             quantity: Amount to extract (optional - if None, uses standard extraction rate)
@@ -128,7 +119,6 @@ class MiningAgent(BaseSupplyChainAgent):
         else:
             # Choose ore type with highest reserves if not specified
             target_ore = max(self.ore_reserves.items(), key=lambda x: x[1])[0]
-        
         # Determine extraction quantity
         if quantity:
             extraction_amount = min(quantity, self.extraction_rate)
@@ -137,34 +127,27 @@ class MiningAgent(BaseSupplyChainAgent):
             base_extraction = self.extraction_rate
             variability_factor = random.uniform(0.8, 1.2) # Random factor between 0.8 and 1.2
             extraction_amount = base_extraction * variability_factor * (self.equipment_efficiency / 100) # Adjust for equipment efficiency
-        
         # Check if we have enough reserves
         if self.ore_reserves[target_ore] < extraction_amount:
             available = self.ore_reserves[target_ore]
             logger.warning(f"{self.name}: Limited reserves for {target_ore}. Extracting {available} tons instead of {extraction_amount}")
             extraction_amount = available
-        
         # Check mine storage capacity
         current_inventory_total = sum(self.inventory.values())
         remaining_capacity = self.mine_capacity - current_inventory_total
-        
         if extraction_amount > remaining_capacity:
             logger.warning(f"{self.name}: Storage near capacity. Extracting {remaining_capacity} tons instead of {extraction_amount}")
             extraction_amount = remaining_capacity
-        
         # Perform the extraction
         if extraction_amount > 0:
             # Update reserves (ore is removed from ground)
             self.ore_reserves[target_ore] -= extraction_amount
-            
             # Add to mine inventory (extracted ore stored at mine)
             self.inventory[target_ore] = self.inventory.get(target_ore, 0.0) + extraction_amount 
-            
             # Update tracking metrics
             self.current_shift_extraction += extraction_amount
             self.total_extracted += extraction_amount
             self.operational_hours += 1.0 # Increment operational hours for each extraction operation
-            
             # Record extraction in history
             extraction_record = {
                 "timestamp": datetime.now(),
@@ -196,14 +179,11 @@ class MiningAgent(BaseSupplyChainAgent):
     def create_shipment_to_processing(self, ore_type: str, quantity: float, destination_agent_id: str) -> bool:
         """
         Create a shipment of extracted ore to send to processing facilities
-        
         This prepares extracted ore for transport to the next stage in the supply chain.
-        
         Args:
             ore_type: Type of ore to ship
             quantity: Amount to ship (in tons)
             destination_agent_id: ID of the processing agent to receive the ore
-            
         Returns:
             bool: True if shipment created successfully, False if validation failed
         """
@@ -212,15 +192,12 @@ class MiningAgent(BaseSupplyChainAgent):
             available = self.inventory.get(ore_type, 0)
             logger.error(f"Cannot create shipment: Not enough {ore_type} in inventory. Requested: {quantity}, Available: {available}")
             return False
-        
         # Validation 2: Check if ore type is valid for this mine
         if ore_type not in self.ore_types:
             logger.error(f"Invalid ore type: {ore_type}. This mine produces: {self.ore_types}")
             return False
-        
         # Generate unique shipment ID
         shipment_id = f"Ship_{self.agent_id}_{len(self.pending_shipments) + 1:04d}"
-        
         # Create shipment details record
         shipment_details = {
             "shipment_id": shipment_id,
