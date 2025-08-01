@@ -373,7 +373,7 @@ def demo_orchestrated_supply_chain():
     orchestrator = SupplyChainOrchestrator()
     
     # Create agents (same as your existing agents)
-    mine = MiningAgent("MINE_001", "Auto Mine", 10000.0, ["Phosphorite Ore"], 800.0)
+    mine = MiningAgent("MINE_001", "Auto Mine", 1,000,000.0, ["Phosphorite Ore"], 1,000.0)
     
     processing_recipes = {
         "Phosphorite_to_PG": {
@@ -385,7 +385,7 @@ def demo_orchestrated_supply_chain():
             "required_method": "chemical_processing"
         }
     }
-    processor = ProcessingAgent("PROC_001", "Auto Processor", 600.0, ["chemical_processing"], processing_recipes)
+    processor = ProcessingAgent("PROC_001", "Auto Processor", 1,000.0, ["chemical_processing"], processing_recipes)
     
     # Register agents with automatic routing
     orchestrator.register_mining_agent(mine, {"Phosphorite Ore": "PROC_001"})
@@ -394,7 +394,7 @@ def demo_orchestrated_supply_chain():
     print("✅ Agents registered with automatic routing")
     
     # Inject materials - they will automatically flow through the system!
-    trace_id = orchestrator.inject_raw_materials("MINE_001", "Phosphorite Ore", 500.0)
+    trace_id = orchestrator.inject_raw_materials("MINE_001", "Phosphorite Ore", 1,000.0)
     print(f"📤 Injected materials - Trace ID: {trace_id}")
     
     # Check pending operator requests
@@ -408,7 +408,7 @@ def demo_orchestrated_supply_chain():
             "selected_recipe": "Phosphorite_to_PG",
             "processing_priority": "normal",
             "quality_target": 0.90,
-            "batch_size": 400.0
+            "batch_size": 500.0
         }
         
         result = orchestrator.process_operator_request(request["request_id"], operator_inputs)
