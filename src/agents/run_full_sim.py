@@ -26,10 +26,10 @@ if not xl.sheet_names:
 
 # --- mining production row ("Production in P2O5 (Ktons)") -----------------------------
 prod_df = (xl
-           .parse(xl.sheet_names[0])
-           .loc[lambda d: d.iloc[:, 0].astype(str)
+        .parse(xl.sheet_names[0])
+        .loc[lambda d: d.iloc[:, 0].astype(str)
                         .str.contains(r"Production\s+.*P2O5", case=False, na=False)]
-           .squeeze())
+        .squeeze())
 
 production = []
 for col in prod_df.index[2:]:            # skip the text columns
@@ -68,7 +68,7 @@ for _, row in exp_raw.iterrows():
 # 2) ── BUILD AGENTS with simple, Ma’aden-style parameters ------------------------------
 # --------------------------------------------------------------------------------------
 mine = MiningAgent("MINE_MPC1", "Maaden Phosphate Mine", 200_000,
-                   ["Phosphorite Ore"], extraction_rate=10_000)
+                ["Phosphorite Ore"], extraction_rate=10_000)
 
 processing_recipes = {
     "Phosphorite_to_PG": {
@@ -95,14 +95,14 @@ manufacturing_recipes = {
     }
 }
 manufacturer = ManufacturingAgent("MFG_MPC1", "DAP Fertilizer Plant",
-                                  25_000, ["chemical_production"], manufacturing_recipes)
+                                25_000, ["chemical_production"], manufacturing_recipes)
 
 dist = DistributionAgent("DIST_MPC1", "Jubail Export Hub", 50_000,
-                         ship_zones=["Zone_A", "Zone_B", "Zone_C"])
+                        ship_zones=["Zone_A", "Zone_B", "Zone_C"])
 retail = RetailAgent("RTL_INTL1", "International Customers",
-                     store_capacity=1_000_000,
-                     sales_channels=["bulk_export"],
-                     customer_zones=["industrial"])
+                    store_capacity=1_000_000,
+                    sales_channels=["bulk_export"],
+                    customer_zones=["industrial"])
 
 # --------------------------------------------------------------------------------------
 # 3) ── SET UP ORCHESTRATOR & ROUTING ---------------------------------------------------
@@ -122,28 +122,33 @@ production = [{"year": 2025, "ore_tons": 100_000}]  # temp stub
 
 demo_year = production[0]
 trace_id = orch.inject_raw_materials("MINE_MPC1", "Phosphorite Ore",
-                                     demo_year["ore_tons"])
+                                    demo_year["ore_tons"])
 
 # ---- AUTO-HANDLE THE PROCESSING OPERATOR REQUEST -------------------------------------
 req = orch.get_pending_operator_requests()[0]
 inputs_proc = {"selected_recipe": "Phosphorite_to_PG",
-               "processing_priority": "normal",
-               "quality_target": 0.88,
-               "batch_size": min(20_000, req["quantity"])}  # simple rule
+            "processing_priority": "normal",
+            "quality_target": 0.88,
+            "batch_size": min(20_000, req["quantity"])}  # simple rule
 orch.process_operator_request(req["request_id"], inputs_proc)
 
 # ---- MANUFACTURING: pull PG from plant & convert -------------------------------------
 # (Since orchestrator doesn’t yet auto-create a manufacturing request, we script it)
 mfg_inputs_required = manufacturer.get_required_inputs("PG_to_Fertilizer",
-                                                       quantity=20_000)
+                                                    quantity=20_000)
 mfg_inputs = {k: v.get("default") for k, v in mfg_inputs_required.items()}
 mfg_result = manufacturer.process_material("PG_to_Fertilizer", mfg_inputs)
 
 # Immediately finish job for demo:
-#manufacturer.run_manufacturing_operations(hours= +3)  # fast-forward 3h     
+manufacturer.run_manufacturing_operations(hours= +3)  # fast-forward 3h     
 
 # Ship fertilizer to distribution
-manufacturer.create_shipment_to_distribution("Bagged_Fertilizer", mfg_result["expected_output_quantity"], "DIST_MPC1")
+manufacturer.run_manufacturing_operations(elapsed_hours=3)
+
+qty_ready = manufacturer.finished_goods_inventory.get("Bagged_Fertilizer", 0.0)
+
+manufacturer.create_shipment_to_distribution(
+        "Bagged_Fertilizer", qty_ready, "DIST_MPC1")
 manufacturer.process_shipments()                # dispatch
 
 # Distribution receives it
