@@ -18,7 +18,6 @@ from datetime import datetime
 # --------------------------------------------------------------------------------------
 
 
-data = pd.read_excel('D:\iCloudDrive\2025\TAL\AMX\AMX Files\AMX MOTHER FILE 2.xlsx')  # load all sheets to check names
 x1 = pd.ExcelFile('D:\iCloudDrive\2025\TAL\AMX\AMX Files\AMX MOTHER FILE 2.xlsx')
 
 # --- mining production row ("Production in P2O5 (Ktons)") -----------------------------
