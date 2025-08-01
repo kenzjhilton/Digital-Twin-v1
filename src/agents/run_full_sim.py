@@ -54,12 +54,16 @@ for _, row in exp_raw.iterrows():
     if product.lower() in {"product", "tons", "usd"} or not product:
         continue
     for y in years:
-        tons = row[y]
-        if pd.notnull(tons) and tons > 0:
-            exports.append({"country": cur_country,
-                            "product": product,
-                            "year": int(y),
-                            "tons": float(tons)})
+        # Convert anything non-numeric to NaN
+        tons_val = pd.to_numeric(row[y], errors="coerce")
+        if pd.notnull(tons_val) and tons_val > 0:
+            exports.append({
+                "country":  cur_country,
+                "product":  product,
+                "year":     int(y),
+                "tons":     float(tons_val)
+            })
+
 # --------------------------------------------------------------------------------------
 # 2) ── BUILD AGENTS with simple, Ma’aden-style parameters ------------------------------
 # --------------------------------------------------------------------------------------
@@ -114,7 +118,9 @@ orch.register_retail_agent(retail)
 # 4) ── LOOP THROUGH ONE YEAR OF PRODUCTION -------------------------------------------
 #      (for a quick demo we’ll use the first row; you can iterate over all years)
 # --------------------------------------------------------------------------------------
-demo_year = production[0]          # pick 1st year for quick run
+production = [{"year": 2025, "ore_tons": 100_000}]  # temp stub
+
+demo_year = production[0]
 trace_id = orch.inject_raw_materials("MINE_MPC1", "Phosphorite Ore",
                                      demo_year["ore_tons"])
 
@@ -134,27 +140,25 @@ mfg_inputs = {k: v.get("default") for k, v in mfg_inputs_required.items()}
 mfg_result = manufacturer.process_material("PG_to_Fertilizer", mfg_inputs)
 
 # Immediately finish job for demo:
-manufacturer.run_manufacturing_operations(hours=3)  # fast-forward 3h
+#manufacturer.run_manufacturing_operations(hours= +3)  # fast-forward 3h     
 
 # Ship fertilizer to distribution
-manufacturer.create_shipment_to_distribution("Bagged_Fertilizer",
-                                             mfg_result["expected_output_quantity"],
-                                             "DIST_MPC1")
+manufacturer.create_shipment_to_distribution("Bagged_Fertilizer", mfg_result["expected_output_quantity"], "DIST_MPC1")
 manufacturer.process_shipments()                # dispatch
 
 # Distribution receives it
 for ship in manufacturer.pending_product_shipments.values():
     pass  # not used here
 received = dist.process_material("Bagged_Fertilizer",
-                                 mfg_result["expected_output_quantity"])
+                                mfg_result["expected_output_quantity"])
 
 # --------------------------------------------------------------------------------------
 # 5) ── CREATE ONE EXPORT ORDER (using first row of exports dataframe) -----------------
 # --------------------------------------------------------------------------------------
 export = exports[0]
 dist.create_shipping_order("Bagged_Fertilizer", export["tons"],
-                           destination=export["country"],
-                           delivery_zone="Zone_A")
+                        destination=export["country"],
+                        delivery_zone="Zone_A")
 dist.process_shipments()
 
 # Retail receives shipment
@@ -172,6 +176,6 @@ print("\n=== JOURNEY LOG ===")
 for step in orch.get_material_trace(trace_id).journey_log:
     ts = step["timestamp"].strftime("%Y-%m-%d %H:%M:%S")
     print(f"{ts:19} | {step['stage']:12} | {step['operation']:10} | "
-          f"{step['agent_id']}")
+        f"{step['agent_id']}")
 
 print("\nRetail inventory snapshot:", retail.product_inventory)
