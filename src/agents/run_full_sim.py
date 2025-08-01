@@ -16,9 +16,13 @@ from datetime import datetime
 # --------------------------------------------------------------------------------------
 # 1) ── READ THE PRODUCTION & EXPORT SHEETS you already inspected -----------------------
 # --------------------------------------------------------------------------------------
+from pathlib import Path
+HERE   = Path(__file__).resolve().parent       # -> src/agents
+EXCEL  = HERE / "AMX MOTHER FILE 2.xlsx"       # full path object
+xl     = pd.ExcelFile(EXCEL)                  # no FileNotFoundError
+if not xl.sheet_names:
+    raise ValueError(f"Excel file {EXCEL} has no sheets. Check the file path.")
 
-
-x1 = pd.ExcelFile('D:\iCloudDrive\2025\TAL\AMX\AMX Files\AMX MOTHER FILE 2.xlsx')
 
 # --- mining production row ("Production in P2O5 (Ktons)") -----------------------------
 prod_df = (xl
