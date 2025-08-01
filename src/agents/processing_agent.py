@@ -30,7 +30,7 @@ class ProcessingAgent(BaseSupplyChainAgent):
     """
     
     def __init__(self, agent_id: str, name: str, processing_capacity: float, 
-                 processing_methods: List[str], transformation_recipes: Dict[str, Dict]):
+        processing_methods: List[str], transformation_recipes: Dict[str, Dict]):
         """
         Initialize the processing facility
         
@@ -335,7 +335,7 @@ class ProcessingAgent(BaseSupplyChainAgent):
         # Start new jobs if equipment capacity is available
         max_concurrent_jobs = len(self.processing_methods)
         while (len(self.active_processing_jobs) < max_concurrent_jobs and 
-               self.processing_queue):
+            self.processing_queue):
             
             # Get next job from queue
             next_job = self.processing_queue.pop(0)

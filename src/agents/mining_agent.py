@@ -1,4 +1,3 @@
-feature/agents
 """
 Mining Agent - Handles raw material extraction from mining operations
 
@@ -9,7 +8,6 @@ This agent represents a mining operation that:
 4. Sends extracted materials to processing facilities
 """
 
-getcwd()
 
 import logging
 from base_agent import BaseSupplyChainAgent  # Importing the base class for supply chain agents
