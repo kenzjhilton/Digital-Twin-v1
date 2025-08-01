@@ -26,13 +26,13 @@ from distribution_agent import DistributionAgent
 from retail_agent import RetailAgent
 
 # Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO) # Set to DEBUG for more detailed logs
+logger = logging.getLogger(__name__) # Set up a logger for this module
 
 @dataclass
 class MaterialTrace:
     """Complete tracking record for materials as they flow through the supply chain"""
-    trace_id: str = field(default_factory=lambda: str(uuid.uuid4()))
+    trace_id: str = field(default_factory=lambda: str(uuid.uuid4())) # Unique identifier for this material trace
     original_material: str = ""
     original_quantity: float = 0.0
     current_material: str = ""
@@ -121,7 +121,7 @@ class SupplyChainOrchestrator:
         logger.info(f"Registered processing agent: {agent.name}")
     
     def register_manufacturing_agent(self, agent: ManufacturingAgent,
-                                   product_distribution_routes: Dict[str, str] = None):
+        product_distribution_routes: Dict[str, str] = None):
         """Register manufacturing agent and define routing to distribution"""
         self.manufacturing_agents[agent.agent_id] = agent
         
