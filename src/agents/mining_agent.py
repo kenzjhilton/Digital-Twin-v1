@@ -473,16 +473,4 @@ def demo_mining_agent():
 # Run the demo if this file is executed directly
 if __name__ == "__main__":
     demo_mining_agent()
-            print(f"  - Total processed: {processing_status['total_processed']} tons")
-            print(f"  - Remaining inventory: {processing_status['remaining_inventory']} tons")
-            print(f"  - Shipments received: {processing_status['shipments_received']}")
-            
-            # Step 10: Show final status of the mining operation
-            print("\n10. Final Mining Status...")
-            final_mining_status = mine.get_mining_status()
-            print(f"Total extracted: {final_mining_status['extraction']['total_extracted']} tons")
-            print(f"Remaining inventory: {final_mining_status['inventory']['total_stored_tons']} tons")
-            print(f"Pending shipments: {len(final_mining_status['shipments']['pending_shipments'])}")
-            print(f"Total shipped: {final_mining_status['shipments']['total_shipped']}")
-    else:
-        print("No shipments were dispatched.")
+    
