@@ -304,9 +304,10 @@ class SupplyChainOrchestrator:
         
         return result
     
+    # In SC_orchestrator.py, update the _simulate_processing_completion method:
+
     def _simulate_processing_completion(self, trace_id: str, processing_result: Dict):
         """Simulate processing completion and route to manufacturing"""
-        # This would normally be triggered by actual job completion
         expected_output = processing_result["expected_output"]
         
         # Find manufacturing route
@@ -315,10 +316,10 @@ class SupplyChainOrchestrator:
         if manufacturing_agent_id and manufacturing_agent_id in self.manufacturing_agents:
             manufacturer = self.manufacturing_agents[manufacturing_agent_id]
             
-            # Simulate shipment to manufacturing
+            # Create shipment data with consistent field names
             shipment_data = {
                 "shipment_id": f"AUTO_{trace_id}",
-                "material_type": expected_output["material"],
+                "material_type": expected_output["material"],  # ✅ Use consistent field name
                 "quantity": expected_output["quantity"],
                 "destination_agent_id": manufacturing_agent_id,
                 "material_quality": expected_output["quality"],

@@ -140,10 +140,10 @@ mfg_inputs = {k: v.get("default") for k, v in mfg_inputs_required.items()}
 mfg_result = manufacturer.process_material("PG_to_Fertilizer", mfg_inputs)
 
 # Immediately finish job for demo:
-manufacturer.run_manufacturing_operations(hours= +3)  # fast-forward 3h     
+manufacturer.run_manufacturing_operations()  # fast-forward 3h     
 
 # Ship fertilizer to distribution
-manufacturer.run_manufacturing_operations(elapsed_hours=3)
+manufacturer.run_manufacturing_operations()
 
 qty_ready = manufacturer.finished_goods_inventory.get("Bagged_Fertilizer", 0.0)
 

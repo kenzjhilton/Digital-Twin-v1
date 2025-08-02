@@ -356,104 +356,111 @@ class ManufacturingAgent(BaseSupplyChainAgent):
         }
     
     def run_manufacturing_operations(self) -> List[Dict]:
-        """
-        Execute queued manufacturing jobs and complete active ones
+    """
+    Execute queued manufacturing jobs and complete active ones
+    
+    Returns:
+        List of completed manufacturing jobs with their results
+    """
+    completed_jobs = []
+    current_time = datetime.now()
+    
+    # Complete active jobs that have finished
+    finished_job_ids = []
+    for job_id, job in self.active_production_jobs.items():
+        estimated_completion = job["started_at"] + timedelta(hours=job["production_time_hours"])
         
-        Returns:
-            List of completed manufacturing jobs with their results
-        """
-        completed_jobs = []
-        current_time = datetime.now()
-        
-        # Complete active jobs that have finished
-        finished_job_ids = []
-        for job_id, job in self.active_production_jobs.items():
-            estimated_completion = job["started_at"] + timedelta(hours=job["production_time_hours"])
+        if current_time >= estimated_completion:
+            # Job is complete - produce the finished products
+            output_product = job["expected_output_product"]
+            output_quantity = job["expected_output_quantity"]
+            quality_standard = job["quality_standard"]
+            qc_level = job["quality_control_level"]
             
-            if current_time >= estimated_completion:
-                # Job is complete - produce the finished products
-                output_product = job["expected_output_product"]
-                output_quantity = job["expected_output_quantity"]
-                quality_standard = job["quality_standard"]
-                qc_level = job["quality_control_level"]
-                
-                # Simulate quality control process
-                qc_success = self.perform_quality_control(output_product, quality_standard, qc_level)
-                
-                if qc_success:
-                    # Add some realistic variability to output (+/- 3%)
-                    actual_output = output_quantity * random.uniform(0.97, 1.03)
-                    
-                    # Add to finished goods inventory
-                    self.finished_goods_inventory[output_product] = (
-                        self.finished_goods_inventory.get(output_product, 0.0) + actual_output
-                    )
-                    
-                    # Record product certification
-                    self.product_certifications[f"{output_product}_{job_id}"] = {
-                        "quality_standard": quality_standard,
-                        "certification_date": current_time,
-                        "batch_id": job_id,
-                        "quantity": actual_output
-                    }
-                    
-                    job["status"] = "completed"
-                    job["actual_output_quantity"] = actual_output
-                    self.quality_control_passes += 1
-                    
-                    logger.info(f"Manufacturing job {job_id} completed: produced {actual_output:.1f} units {output_product}")
-                else:
-                    # Quality control failed - rework or discard
-                    job["status"] = "quality_control_failed"
-                    job["actual_output_quantity"] = 0.0
-                    self.quality_control_failures += 1
-                    
-                    logger.warning(f"Manufacturing job {job_id} failed quality control")
-                
-                # Update job completion details
-                job["completed_at"] = current_time
-                
-                # Update performance metrics
-                self.total_products_manufactured += job.get("actual_output_quantity", 0.0)
-                self.manufacturing_costs += job["energy_cost"]
-                
-                # Move to history
-                self.production_history.append(dict(job))
-                completed_jobs.append(dict(job))
-                finished_job_ids.append(job_id)
-        
-        # Remove completed jobs from active list
-        for job_id in finished_job_ids:
-            del self.active_production_jobs[job_id]
-        
-        # Start new jobs if production line capacity is available
-        max_concurrent_jobs = len(self.production_lines)
-        while (len(self.active_production_jobs) < max_concurrent_jobs and 
-               self.production_queue):
+            # Simulate quality control process
+            qc_success = self.perform_quality_control(output_product, quality_standard, qc_level)
             
-            # Get next job from queue
-            next_job = self.production_queue.pop(0)
-            
-            # Check if required production line is available
-            required_line = self.manufacturing_recipes[next_job["recipe_name"]].get("required_line")
-            line_busy = any(
-                self.manufacturing_recipes[job["recipe_name"]].get("required_line") == required_line
-                for job in self.active_production_jobs.values()
-            )
-            
-            if not line_busy and self.production_line_status.get(required_line) == "operational":
-                # Start the job
-                next_job["status"] = "manufacturing"
-                next_job["started_at"] = current_time
-                self.active_production_jobs[next_job["job_id"]] = next_job
+            if qc_success:
+                # Add some realistic variability to output (+/- 3%)
+                actual_output = output_quantity * random.uniform(0.97, 1.03)
                 
-                logger.info(f"Started manufacturing job {next_job['job_id']}: {next_job['recipe_name']}")
+                # Add to finished goods inventory
+                self.finished_goods_inventory[output_product] = (
+                    self.finished_goods_inventory.get(output_product, 0.0) + actual_output
+                )
+                
+                # Record product certification
+                self.product_certifications[f"{output_product}_{job_id}"] = {
+                    "quality_standard": quality_standard,
+                    "certification_date": current_time,
+                    "batch_id": job_id,
+                    "quantity": actual_output
+                }
+                
+                job["status"] = "completed"
+                job["actual_output_quantity"] = actual_output
+                self.quality_control_passes += 1
+                
+                logger.info(f"Manufacturing job {job_id} completed: produced {actual_output:.1f} units {output_product}")
             else:
-                # Put job back at front of queue if production line not available
-                self.production_queue.insert(0, next_job)
-                break
+                # Quality control failed - rework or discard
+                job["status"] = "quality_control_failed"
+                job["actual_output_quantity"] = 0.0
+                self.quality_control_failures += 1
+                
+                logger.warning(f"Manufacturing job {job_id} failed quality control")
+            
+            # Update job completion details
+            job["completed_at"] = current_time
+            
+            # Update performance metrics
+            self.total_products_manufactured += job.get("actual_output_quantity", 0.0)
+            self.manufacturing_costs += job["energy_cost"]
+            
+            # Move to history
+            self.production_history.append(dict(job))
+            completed_jobs.append(dict(job))
+            finished_job_ids.append(job_id)
+    
+    # Remove completed jobs from active list
+    for job_id in finished_job_ids:
+        del self.active_production_jobs[job_id]
+    
+    # Start new jobs with improved queue management
+    max_jobs_per_line = 1  # Limit concurrent jobs per production line
+    
+    # Group active jobs by production line
+    active_lines = {}
+    for job in self.active_production_jobs.values():
+        recipe = self.manufacturing_recipes[job["recipe_name"]]
+        required_line = recipe.get("required_line", "default")
+        active_lines[required_line] = active_lines.get(required_line, 0) + 1
+    
+    # Start new jobs only if lines are available
+    queue_index = 0
+    while queue_index < len(self.production_queue):
+        next_job = self.production_queue[queue_index]
+        required_line = self.manufacturing_recipes[next_job["recipe_name"]].get("required_line", "default")
         
-        return completed_jobs
+        # Check if this production line is available
+        current_jobs_on_line = active_lines.get(required_line, 0)
+        line_operational = self.production_line_status.get(required_line) == "operational"
+        
+        if current_jobs_on_line < max_jobs_per_line and line_operational:
+            # Start the job
+            job_to_start = self.production_queue.pop(queue_index)
+            job_to_start["status"] = "manufacturing"
+            job_to_start["started_at"] = current_time
+            self.active_production_jobs[job_to_start["job_id"]] = job_to_start
+            
+            # Update active lines count
+            active_lines[required_line] = active_lines.get(required_line, 0) + 1
+            
+            logger.info(f"Started manufacturing job {job_to_start['job_id']}: {job_to_start['recipe_name']}")
+        else:
+            queue_index += 1  # Move to next job if this line is busy
+    
+    return completed_jobs
     
     def perform_quality_control(self, product: str, quality_standard: str, qc_level: str) -> bool:
         """
