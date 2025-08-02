@@ -5,14 +5,6 @@ from AMX MOTHER FILE 2.xlsx, using the Supply-chain-reconstruction agents.
 """
 
 import pandas as pd
-# From your main repository directory
-git worktree add ../supply-chain-agents agent
-git worktree add ../supply-chain-simulation simulation
-
-# This creates:
-# supply-chain-reconstruction/     (main)
-# supply-chain-agents/            (agent branch)  
-# supply-chain-simulation/        (simulation branch)
 from SC_orchestrator import SupplyChainOrchestrator
 from mining_agent          import MiningAgent
 from processing_agent      import ProcessingAgent

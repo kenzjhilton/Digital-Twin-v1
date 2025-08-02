@@ -355,12 +355,12 @@ class ManufacturingAgent(BaseSupplyChainAgent):
             "estimated_completion": datetime.now() + timedelta(hours=adjusted_production_time)
         }
     
-    def run_manufacturing_operations(self) -> List[Dict]:
+def run_manufacturing_operations(self) -> List[Dict]:
     """
     Execute queued manufacturing jobs and complete active ones
     
     Returns:
-        List of completed manufacturing jobs with their results
+    List of completed manufacturing jobs with their results
     """
     completed_jobs = []
     current_time = datetime.now()
