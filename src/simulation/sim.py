@@ -17,14 +17,6 @@ from typing import Dict, List, Optional, Any
 import random
 from pathlib import Path
 
-
-# simulation/sim.py
-from agents.mining_agent import MiningAgent
-from agents.processing_agent import ProcessingAgent
-from agents.manufacturing_agent import ManufacturingAgent
-from agents.distribution_agent import DistributionAgent
-from agents.retail_agent import RetailAgent
-
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
