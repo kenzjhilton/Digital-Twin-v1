@@ -131,7 +131,7 @@ except ImportError as e:
 
 # Import orchestrator if available
 try:
-    from .agents.SC_orchestrator import SupplyChainOrchestrator, MaterialTrace
+    from .agents.agent_orchestrator import SupplyChainOrchestrator, MaterialTrace
     _orchestrator_available = True
 except ImportError as e:
     logging.warning(f"Orchestrator import failed: {e}")
