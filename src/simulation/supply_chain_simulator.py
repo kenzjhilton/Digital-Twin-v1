@@ -10,7 +10,7 @@ Usage:
     python complete_simulation.py
 """
 
-import pandas as pd
+from pandas import pandas as pd
 import logging
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Any
@@ -502,7 +502,7 @@ class SupplyChainSimulator:
         # Use 80% of available materials
         production_quantity = max_production * 0.8
         
-        # Calculate outputs
+        # Calculate outputs2
         output_quantity = production_quantity * recipe_data['output_quantity_ratio']
         production_time = recipe_data['production_time_hours']
         
