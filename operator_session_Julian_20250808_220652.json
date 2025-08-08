@@ -1,0 +1,178 @@
+{
+  "operator_name": "Julian",
+  "company_name": "Aleff Group Solutions",
+  "session_start": "2025-08-08T22:00:56.444948",
+  "decisions_made": [
+    {
+      "stage": "simulation_overview",
+      "timestamp": "2025-08-08T22:02:25.275415",
+      "operator": "Julian",
+      "decision": {
+        "simulation_type": "Mining to Manufacturing (Phosphate/Fertilizer)",
+        "time_horizon": "1 Month",
+        "primary_region": "Middle East (Saudi Arabia/UAE)",
+        "company_name": "Aleff Group Solutions",
+        "operator_name": "Julian"
+      }
+    },
+    {
+      "stage": "mining_setup",
+      "timestamp": "2025-08-08T22:04:49.731319",
+      "operator": "Julian",
+      "decision": {
+        "facility_name": "Jalamid",
+        "location": "B\\Northern Provinc",
+        "ore_type": "Phosphorite Ore",
+        "storage_capacity": 500000,
+        "extraction_rate": 2000,
+        "total_reserves": 5000000,
+        "ore_quality": 0.85,
+        "extraction_quantity": 100000,
+        "equipment_status": {
+          "Drilling Equipment": "Operational",
+          "Excavation Equipment": "Operational",
+          "Transport Equipment": "Operational",
+          "Crushing Equipment": "Operational"
+        }
+      }
+    },
+    {
+      "stage": "processing_setup",
+      "timestamp": "2025-08-08T22:04:57.442900",
+      "operator": "Julian",
+      "decision": {
+        "facility_name": "Aleff Group Solutions Processing Plant",
+        "processing_methods": [
+          "Chemical Processing (Acid treatment, beneficiation)"
+        ],
+        "capacity": 5000,
+        "target_efficiency": 0.82,
+        "target_quality": 0.87,
+        "processing_time_hours": 4
+      }
+    },
+    {
+      "stage": "manufacturing_setup",
+      "timestamp": "2025-08-08T22:05:02.626173",
+      "operator": "Julian",
+      "decision": {
+        "facility_name": "Aleff Group Solutions Manufacturing Plant",
+        "primary_product": "DAP Fertilizer",
+        "production_lines": [
+          "Chemical Production Line",
+          "Bagging and Packaging Line",
+          "Bulk Loading Line",
+          "Quality Control Line",
+          "Blending and Mixing Line"
+        ],
+        "capacity": 3000,
+        "quality_standard": "Export Grade",
+        "production_efficiency": 0.94
+      }
+    },
+    {
+      "stage": "distribution_setup",
+      "timestamp": "2025-08-08T22:05:11.925243",
+      "operator": "Julian",
+      "decision": {
+        "center_name": "1",
+        "location": "Industrial Port",
+        "storage_capacity": 50000,
+        "export_destinations": {
+          "Asia Pacific": [
+            "China",
+            "India"
+          ]
+        },
+        "shipping_methods": [
+          "Bulk Carrier Ships",
+          "Container Ships",
+          "Rail Transport",
+          "Road Transport (Trucks)",
+          "Pipeline Transport"
+        ],
+        "port_facilities": [
+          "Loading Berths",
+          "Bulk Handling Equipment",
+          "Container Terminals",
+          "Rail Connections"
+        ]
+      }
+    },
+    {
+      "stage": "sales_setup",
+      "timestamp": "2025-08-08T22:05:20.107573",
+      "operator": "Julian",
+      "decision": {
+        "organization_name": "Aleff Group Solutions Sales",
+        "sales_channels": [
+          "Bulk Export Sales",
+          "Container Export Sales",
+          "Domestic Market Sales",
+          "Spot Market Trading",
+          "Long-term Contracts",
+          "Government Sales",
+          "Direct Customer Sales"
+        ],
+        "target_customers": [
+          "Agricultural Cooperatives",
+          "Industrial Manufacturers",
+          "Government Agencies",
+          "Trading Companies",
+          "Retail Distributors",
+          "Construction Companies"
+        ],
+        "pricing_strategy": "Market Rate Pricing",
+        "monthly_sales_target": 25000,
+        "target_profit_margin": 15,
+        "preferred_payment_terms": "Cash in Advance"
+      }
+    },
+    {
+      "stage": "processing_operational",
+      "timestamp": "2025-08-08T22:05:48.835380",
+      "operator": "Julian",
+      "decision": {
+        "processing_recipe": "Standard Processing",
+        "quality_target": 0.87,
+        "batch_size": 25000,
+        "priority": "Urgent"
+      }
+    },
+    {
+      "stage": "manufacturing_operational",
+      "timestamp": "2025-08-08T22:06:13.538232",
+      "operator": "Julian",
+      "decision": {
+        "product_type": "DAP Fertilizer",
+        "quality_standard": "Export Grade",
+        "production_rate": "Maximum",
+        "batch_size": 20000,
+        "packaging": "1000kg Bags"
+      }
+    },
+    {
+      "stage": "distribution_operational",
+      "timestamp": "2025-08-08T22:06:31.389589",
+      "operator": "Julian",
+      "decision": {
+        "destination_country": "China",
+        "shipping_method": "Bulk Carrier",
+        "delivery_schedule": "Immediate",
+        "allocation_percent": 70
+      }
+    },
+    {
+      "stage": "retail_operational",
+      "timestamp": "2025-08-08T22:06:52.582848",
+      "operator": "Julian",
+      "decision": {
+        "customer_type": "Industrial Manufacturer",
+        "pricing_approach": "Competitive Price",
+        "sales_channel": "Container Export",
+        "payment_terms": "Letter of Credit",
+        "sales_quantity": 10000
+      }
+    }
+  ]
+}
