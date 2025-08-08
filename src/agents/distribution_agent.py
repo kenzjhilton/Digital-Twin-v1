@@ -364,6 +364,12 @@ def demo_distribution_agent():
     creates shipping orders, and demonstrates the complete workflow.
     """
     # Create a new distribution center
+    input("Press Enter to create a distribution center...")
+    logger.info("Creating distribution center...")
+    
+    input("Please enter the distribution center details:\n ")
+
+    # Initialize the distribution agent with example parameters)
     dist_centre = DistributionAgent(
         "DIST_001",
         "Regional Distribution Center East",
