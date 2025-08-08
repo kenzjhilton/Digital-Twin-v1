@@ -22,10 +22,10 @@ Usage:
 """
 
 # Import all agent classes to make them available at package level
-from .base_agent import BaseSupplyChainAgent
-from .mining_agent import MiningAgent
-from .processing_agent import ProcessingAgent
-from .distribution_agent import DistributionAgent
+from base_agent import BaseSupplyChainAgent
+from mining_agent import MiningAgent
+from processing_agent import ProcessingAgent
+from distribution_agent import DistributionAgent
 
 # These will be available once you create them
 try:

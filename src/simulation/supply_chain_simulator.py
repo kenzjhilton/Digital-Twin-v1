@@ -5,7 +5,6 @@ Complete Supply Chain Simulation System
 This system integrates all your agents and provides a complete end-to-end 
 simulation from raw material injection to customer delivery, with support
 for Excel data input and operator decision points.
-
 Usage:
     python complete_simulation.py
 """
