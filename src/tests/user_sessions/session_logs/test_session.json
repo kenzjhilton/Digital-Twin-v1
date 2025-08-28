@@ -1,0 +1,14 @@
+{
+  "operator_name": "Test User",
+  "company_name": "Test Company",
+  "session_start": "2025-08-28T19:29:40.052965",
+  "decisions_made": [
+    {
+      "stage": "mining",
+      "decision": {
+        "ore_type": "Phosphorite Ore",
+        "quantity": 1000
+      }
+    }
+  ]
+}

@@ -1,27 +1,27 @@
 {
-  "operator_name": "Julian",
-  "company_name": "Aleff Group Solutions",
-  "session_start": "2025-08-08T22:00:56.444948",
+  "operator_name": "Test User 1",
+  "company_name": "Test Company 1",
+  "session_start": "2025-08-28T19:13:36.043210",
   "decisions_made": [
     {
       "stage": "simulation_overview",
-      "timestamp": "2025-08-08T22:02:25.275415",
-      "operator": "Julian",
+      "timestamp": "2025-08-28T19:15:32.471521",
+      "operator": "Test User 1",
       "decision": {
-        "simulation_type": "Mining to Manufacturing (Phosphate/Fertilizer)",
-        "time_horizon": "1 Month",
-        "primary_region": "Middle East (Saudi Arabia/UAE)",
-        "company_name": "Aleff Group Solutions",
-        "operator_name": "Julian"
+        "simulation_type": "Full End-to-End (Mining to Customer)",
+        "time_horizon": "1 Year",
+        "primary_region": "Asia Pacific",
+        "company_name": "Test Company 1",
+        "operator_name": "Test User 1"
       }
     },
     {
       "stage": "mining_setup",
-      "timestamp": "2025-08-08T22:04:49.731319",
-      "operator": "Julian",
+      "timestamp": "2025-08-28T19:16:01.116218",
+      "operator": "Test User 1",
       "decision": {
-        "facility_name": "Jalamid",
-        "location": "B\\Northern Provinc",
+        "facility_name": "China Mining Facility",
+        "location": "NW China",
         "ore_type": "Phosphorite Ore",
         "storage_capacity": 500000,
         "extraction_rate": 2000,
@@ -38,12 +38,16 @@
     },
     {
       "stage": "processing_setup",
-      "timestamp": "2025-08-08T22:04:57.442900",
-      "operator": "Julian",
+      "timestamp": "2025-08-28T19:16:23.294853",
+      "operator": "Test User 1",
       "decision": {
-        "facility_name": "Aleff Group Solutions Processing Plant",
+        "facility_name": "China Processing Facility 1",
         "processing_methods": [
-          "Chemical Processing (Acid treatment, beneficiation)"
+          "Chemical Processing (Acid treatment, beneficiation)",
+          "Physical Processing (Crushing, grinding, separation)",
+          "Thermal Processing (Smelting, roasting)",
+          "Beneficiation (Flotation, magnetic separation)",
+          "Hydrometallurgy (Leaching, extraction)"
         ],
         "capacity": 5000,
         "target_efficiency": 0.82,
@@ -53,11 +57,11 @@
     },
     {
       "stage": "manufacturing_setup",
-      "timestamp": "2025-08-08T22:05:02.626173",
-      "operator": "Julian",
+      "timestamp": "2025-08-28T19:17:36.209531",
+      "operator": "Test User 1",
       "decision": {
-        "facility_name": "Aleff Group Solutions Manufacturing Plant",
-        "primary_product": "DAP Fertilizer",
+        "facility_name": "Chinese Manufacturing Facility 1",
+        "primary_product": "RBS PG Material",
         "production_lines": [
           "Chemical Production Line",
           "Bagging and Packaging Line",
@@ -66,22 +70,25 @@
           "Blending and Mixing Line"
         ],
         "capacity": 3000,
-        "quality_standard": "Export Grade",
+        "quality_standard": "Premium",
         "production_efficiency": 0.94
       }
     },
     {
       "stage": "distribution_setup",
-      "timestamp": "2025-08-08T22:05:11.925243",
-      "operator": "Julian",
+      "timestamp": "2025-08-28T19:18:33.028926",
+      "operator": "Test User 1",
       "decision": {
-        "center_name": "1",
-        "location": "Industrial Port",
+        "center_name": "China Distribution Centre 1",
+        "location": "China",
         "storage_capacity": 50000,
         "export_destinations": {
           "Asia Pacific": [
             "China",
             "India"
+          ],
+          "Africa": [
+            "Morocco"
           ]
         },
         "shipping_methods": [
@@ -101,10 +108,10 @@
     },
     {
       "stage": "sales_setup",
-      "timestamp": "2025-08-08T22:05:20.107573",
-      "operator": "Julian",
+      "timestamp": "2025-08-28T19:19:42.051373",
+      "operator": "Test User 1",
       "decision": {
-        "organization_name": "Aleff Group Solutions Sales",
+        "organization_name": "RBS AUS",
         "sales_channels": [
           "Bulk Export Sales",
           "Container Export Sales",
@@ -115,14 +122,13 @@
           "Direct Customer Sales"
         ],
         "target_customers": [
-          "Agricultural Cooperatives",
           "Industrial Manufacturers",
           "Government Agencies",
           "Trading Companies",
           "Retail Distributors",
           "Construction Companies"
         ],
-        "pricing_strategy": "Market Rate Pricing",
+        "pricing_strategy": "Competitive Pricing",
         "monthly_sales_target": 25000,
         "target_profit_margin": 15,
         "preferred_payment_terms": "Cash in Advance"
@@ -130,10 +136,10 @@
     },
     {
       "stage": "processing_operational",
-      "timestamp": "2025-08-08T22:05:48.835380",
-      "operator": "Julian",
+      "timestamp": "2025-08-28T19:19:54.018972",
+      "operator": "Test User 1",
       "decision": {
-        "processing_recipe": "Standard Processing",
+        "processing_recipe": "Efficient Processing",
         "quality_target": 0.87,
         "batch_size": 25000,
         "priority": "Urgent"
@@ -141,36 +147,36 @@
     },
     {
       "stage": "manufacturing_operational",
-      "timestamp": "2025-08-08T22:06:13.538232",
-      "operator": "Julian",
+      "timestamp": "2025-08-28T19:20:13.909722",
+      "operator": "Test User 1",
       "decision": {
-        "product_type": "DAP Fertilizer",
-        "quality_standard": "Export Grade",
-        "production_rate": "Maximum",
+        "product_type": "Industrial Grade",
+        "quality_standard": "Premium",
+        "production_rate": "Optimal",
         "batch_size": 20000,
-        "packaging": "1000kg Bags"
+        "packaging": "50kg Bags"
       }
     },
     {
       "stage": "distribution_operational",
-      "timestamp": "2025-08-08T22:06:31.389589",
-      "operator": "Julian",
+      "timestamp": "2025-08-28T19:20:41.453272",
+      "operator": "Test User 1",
       "decision": {
         "destination_country": "China",
-        "shipping_method": "Bulk Carrier",
+        "shipping_method": "Combined Transport",
         "delivery_schedule": "Immediate",
         "allocation_percent": 70
       }
     },
     {
       "stage": "retail_operational",
-      "timestamp": "2025-08-08T22:06:52.582848",
-      "operator": "Julian",
+      "timestamp": "2025-08-28T19:20:55.091903",
+      "operator": "Test User 1",
       "decision": {
         "customer_type": "Industrial Manufacturer",
         "pricing_approach": "Competitive Price",
-        "sales_channel": "Container Export",
-        "payment_terms": "Letter of Credit",
+        "sales_channel": "Bulk Export",
+        "payment_terms": "Cash Advance",
         "sales_quantity": 10000
       }
     }

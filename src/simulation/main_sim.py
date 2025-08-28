@@ -35,8 +35,113 @@ class InteractiveOperatorInterface:
             'session_start': datetime.now(),
             'decisions_made': []
         }
+        # Initialize a session manager for logging test/interactive runs
+        self.session_manager = self._init_session_manager()
         self.clear_screen()
-    
+
+    def _init_session_manager(self):
+        """Initialize a session manager; prefer test manager when testing.
+
+        - If env `TEST_MODE` or `PYTEST_CURRENT_TEST` is set, default base path
+          to `src/tests/user_sessions` so test artifacts do not pollute prod dirs.
+        - `SESSION_BASE_PATH` can override default locations.
+        """
+        base_path_env = os.environ.get("SESSION_BASE_PATH")
+        in_test = bool(os.environ.get("TEST_MODE") or os.environ.get("PYTEST_CURRENT_TEST"))
+        default_base = "src/tests/user_sessions" if in_test else "data/user_sessions"
+        base_path = base_path_env or default_base
+
+        try:
+            from src.tests.user_sessions.session_manager import UserSessionManager as _UserSessionManager
+            return _UserSessionManager(base_path=base_path)
+        except Exception:
+            # Lightweight fallback that writes JSON files to the chosen base path
+            from pathlib import Path
+            import json as _json
+
+            class _FallbackManager:
+                def __init__(self, base_path: str):
+                    self.base = Path(base_path)
+                    self.logs = self.base / "session_logs"
+                    self.scenarios = self.base / "test_scenarios"
+                    self.configs = self.base / "operator_configs"
+                    self.results = self.base / "simulation_results"
+                    for p in (self.logs, self.scenarios, self.configs, self.results):
+                        p.mkdir(parents=True, exist_ok=True)
+
+                def _dump(self, path: Path, data: dict):
+                    def _ser(o):
+                        if isinstance(o, datetime):
+                            return o.isoformat()
+                        return o
+                    with open(path, 'w') as f:
+                        _json.dump(data, f, indent=2, default=_ser)
+                    return str(path)
+
+                def save_session_log(self, session_data, session_name=None):
+                    name = session_name or datetime.now().strftime("session_%Y_%m_%d_%H_%M_%S")
+                    return self._dump(self.logs / f"{name}.json", session_data)
+
+                def save_test_scenario(self, scenario_data, scenario_name: str):
+                    return self._dump(self.scenarios / f"{scenario_name}.json", scenario_data)
+
+                def save_simulation_results(self, results_data, results_name=None):
+                    name = results_name or datetime.now().strftime("results_%Y_%m_%d_%H_%M")
+                    return self._dump(self.results / f"{name}.json", results_data)
+
+                def save_operator_config(self, config_data, facility_name: str, kind: str = "generic"):
+                    safe = (facility_name or "default").replace(' ', '_')
+                    target = (self.configs / kind)
+                    target.mkdir(parents=True, exist_ok=True)
+                    return self._dump(target / f"{safe}_config.json", config_data)
+
+            return _FallbackManager(base_path)
+    def create_reusable_scenario(self, scenario_name: str):
+        """Create a reusable test scenario from current session"""
+        scenario_data = {
+            'simulation_type': self.session_data.get('overview', {}).get('simulation_type'),
+            'mining_config': self.session_data.get('mining', {}),
+            'processing_config': self.session_data.get('processing', {}),
+            'manufacturing_config': self.session_data.get('manufacturing', {}),
+            'distribution_config': self.session_data.get('distribution', {}),
+            'sales_config': self.session_data.get('sales', {}),
+            'created_date': datetime.now().isoformat(),
+            'description': f"Test scenario: {scenario_name}"
+        }
+        
+        return self.session_manager.save_test_scenario(scenario_data, scenario_name)
+    def save_operator_configs(self):
+        """Save individual configurations for reuse"""
+        configs_saved = []
+        
+        # Save mining config
+        if 'mining' in self.session_data:
+            filename = self.session_manager.save_operator_config(
+                self.session_data['mining'], 
+                self.session_data['mining'].get('facility_name', 'default').replace(' ', '_'),
+                'mining'
+            )
+            configs_saved.append(filename)
+        
+        # Save processing config
+        if 'processing' in self.session_data:
+            filename = self.session_manager.save_operator_config(
+                self.session_data['processing'],
+                self.session_data['processing'].get('facility_name', 'default').replace(' ', '_'),
+                'processing'
+            )
+            configs_saved.append(filename)
+        
+        # Save manufacturing config  
+        if 'manufacturing' in self.session_data:
+            filename = self.session_manager.save_operator_config(
+                self.session_data['manufacturing'],
+                self.session_data['manufacturing'].get('facility_name', 'default').replace(' ', '_'),
+                'manufacturing'
+            )
+            configs_saved.append(filename)
+        
+        return configs_saved
     def clear_screen(self):
         """Clear the terminal screen for better UX"""
         os.system('cls' if os.name == 'nt' else 'clear')
@@ -757,24 +862,21 @@ class InteractiveOperatorInterface:
         self.session_data['decisions_made'].append(log_entry)
     
     def save_session_log(self, filename: str = None):
-        """Save operator session log to file"""
-        if filename is None:
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            operator_name = self.session_data['operator_name'].replace(' ', '_')
-            filename = f"operator_session_{operator_name}_{timestamp}.json"
-        
-        # Convert datetime objects to strings for JSON serialization
-        session_copy = dict(self.session_data)
-        session_copy['session_start'] = session_copy['session_start'].isoformat()
-        
-        for decision in session_copy['decisions_made']:
-            decision['timestamp'] = decision['timestamp'].isoformat()
-        
-        with open(filename, 'w') as f:
-            json.dump(session_copy, f, indent=2)
-        
-        print(f"📁 Session log saved to: {filename}")
-        return filename
+        """Save operator session log via the configured session manager.
+
+        If a filename is provided, its stem is used as the session name, and
+        the manager will handle the extension and destination directory.
+        """
+        session_name = None
+        if filename:
+            try:
+                from pathlib import Path as _P
+                session_name = _P(filename).stem
+            except Exception:
+                session_name = filename
+        saved_path = self.session_manager.save_session_log(self.session_data, session_name)
+        print(f"📁 Session log saved to: {saved_path}")
+        return saved_path
 
 
 class EnhancedSupplyChainSimulator:
@@ -1406,7 +1508,33 @@ class EnhancedSupplyChainSimulator:
         
         # Print summary
         self._print_final_summary(simulation_results)
+
+        print(f"\n💾 SAVING SIMULATION DATA")
+        print("=" * 40)
         
+        # Save session log
+        session_log_file = self.operator_interface.save_session_log()
+        simulation_results['session_log_file'] = session_log_file
+        
+        # Save simulation results
+        results_file = self.operator_interface.session_manager.save_simulation_results(
+            simulation_results
+        )
+        simulation_results['results_file'] = results_file
+        
+        # Save operator configs for reuse
+        config_files = self.operator_interface.save_operator_configs()
+        simulation_results['config_files'] = config_files
+        
+        # Ask if user wants to save as reusable scenario
+        save_scenario = input("Save this configuration as a reusable test scenario? (y/n): ").strip().lower()
+        if save_scenario in ['y', 'yes']:
+            scenario_name = input("Enter scenario name: ").strip()
+            if scenario_name:
+                scenario_file = self.operator_interface.create_reusable_scenario(scenario_name)
+                simulation_results['scenario_file'] = scenario_file
+            print(f"📁 All data saved successfully!")
+      
         return simulation_results
     
     def _print_final_summary(self, results: Dict):
