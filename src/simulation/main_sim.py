@@ -11,7 +11,6 @@ Usage:
     python enhanced_supply_chain_simulator.py
 """
 
-import pandas as pd
 import logging 
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Any
@@ -1464,14 +1463,9 @@ class EnhancedSupplyChainSimulator:
         )
         simulation_results['obsidian_notes'] = obsidian_notes
         
-        # Ask if user wants to save as reusable scenario
-        save_scenario = input("Save this configuration as a reusable test scenario? (y/n): ").strip().lower()
-        if save_scenario in ['y', 'yes']:
-            scenario_name = input("Enter scenario name: ").strip()
-            if scenario_name:
-                scenario_file = self.operator_interface.create_reusable_scenario(scenario_name)
-                simulation_results['scenario_file'] = scenario_file
-            print(f"📁 All data saved successfully!")
+        # Optional scenario saving (disabled: no local scenario manager available)
+        # Keeping UX message to indicate completion
+        print(f"📁 All data saved successfully to Obsidian vault!")
       
         return simulation_results
     
@@ -1609,7 +1603,6 @@ def run_demo_with_prompts():
     
     # Save demo configuration
     interface.save_session_log("demo_configuration.json")
-
 
 def quick_start_guide():
     """Print quick start guide for operators"""
