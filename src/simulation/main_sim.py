@@ -1560,6 +1560,9 @@ def main():
         simulator._print_final_summary(results)
         print("\n✅ Saved to Obsidian vault.")
         return 0
+    except Exception as e:
+        print(f"\n❌ Simulation failed: {e}")
+        return 1
     
 def run_demo_with_prompts():
     """Run a quick demo that shows the operator input prompts"""
