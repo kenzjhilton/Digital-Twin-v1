@@ -20,6 +20,7 @@ from pathlib import Path
 import json
 import sys
 import os
+import importlib.util
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -28,120 +29,50 @@ logger = logging.getLogger(__name__)
 class InteractiveOperatorInterface:
     """Enhanced operator interface for collecting real inputs with validation"""
     
-    def __init__(self):
+    def __init__(self, obsidian_vault_path: str = None):
         self.session_data = {
             'operator_name': None,
             'company_name': None,
             'session_start': datetime.now(),
             'decisions_made': []
         }
-        # Initialize a session manager for logging test/interactive runs
-        self.session_manager = self._init_session_manager()
+        # Initialize Obsidian saver (robust import regardless of folder name/spacing)
+        self.obsidian_saver = self._init_obsidian_saver(obsidian_vault_path)
         self.clear_screen()
 
-    def _init_session_manager(self):
-        """Initialize a session manager; prefer test manager when testing.
+    def _init_obsidian_saver(self, vault_path: Optional[str]):
+        """Import and construct ObsidianAutoSaver even if folder has spaces."""
+        # Try loading from file path: src/Obsidian Integration/obsidian_auto_saver.py
+        this_dir = Path(__file__).resolve().parents[1]
+        spaced_dir = this_dir / 'Obsidian Integration'
+        underscored_dir = this_dir / 'Obsidian_Integration'
+        candidate_file = None
+        if (spaced_dir / 'obsidian_auto_saver.py').exists():
+            candidate_file = spaced_dir / 'obsidian_auto_saver.py'
+        elif (underscored_dir / 'obsidian_auto_saver.py').exists():
+            candidate_file = underscored_dir / 'obsidian_auto_saver.py'
 
-        - If env `TEST_MODE` or `PYTEST_CURRENT_TEST` is set, default base path
-          to `src/tests/user_sessions` so test artifacts do not pollute prod dirs.
-        - `SESSION_BASE_PATH` can override default locations.
-        """
-        base_path_env = os.environ.get("SESSION_BASE_PATH")
-        in_test = bool(os.environ.get("TEST_MODE") or os.environ.get("PYTEST_CURRENT_TEST"))
-        default_base = "src/tests/user_sessions" if in_test else "data/user_sessions"
-        base_path = base_path_env or default_base
+        ObsidianAutoSaver = None
+        if candidate_file is not None:
+            spec = importlib.util.spec_from_file_location('obsidian_auto_saver', str(candidate_file))
+            module = importlib.util.module_from_spec(spec)
+            assert spec and spec.loader
+            spec.loader.exec_module(module)  # type: ignore[attr-defined]
+            ObsidianAutoSaver = getattr(module, 'ObsidianAutoSaver', None)
 
-        try:
-            from src.tests.user_sessions.session_manager import UserSessionManager as _UserSessionManager
-            return _UserSessionManager(base_path=base_path)
-        except Exception:
-            # Lightweight fallback that writes JSON files to the chosen base path
-            from pathlib import Path
-            import json as _json
+        # Fallback to package import if available
+        if ObsidianAutoSaver is None:
+            try:
+                from src.Obsidian_Integration.obsidian_auto_saver import ObsidianAutoSaver as PkgSaver  # type: ignore
+                ObsidianAutoSaver = PkgSaver
+            except Exception:
+                pass
 
-            class _FallbackManager:
-                def __init__(self, base_path: str):
-                    self.base = Path(base_path)
-                    self.logs = self.base / "session_logs"
-                    self.scenarios = self.base / "test_scenarios"
-                    self.configs = self.base / "operator_configs"
-                    self.results = self.base / "simulation_results"
-                    for p in (self.logs, self.scenarios, self.configs, self.results):
-                        p.mkdir(parents=True, exist_ok=True)
+        if ObsidianAutoSaver is None:
+            raise ImportError("Could not import ObsidianAutoSaver. Ensure obsidian_auto_saver.py exists.")
 
-                def _dump(self, path: Path, data: dict):
-                    def _ser(o):
-                        if isinstance(o, datetime):
-                            return o.isoformat()
-                        return o
-                    with open(path, 'w') as f:
-                        _json.dump(data, f, indent=2, default=_ser)
-                    return str(path)
-
-                def save_session_log(self, session_data, session_name=None):
-                    name = session_name or datetime.now().strftime("session_%Y_%m_%d_%H_%M_%S")
-                    return self._dump(self.logs / f"{name}.json", session_data)
-
-                def save_test_scenario(self, scenario_data, scenario_name: str):
-                    return self._dump(self.scenarios / f"{scenario_name}.json", scenario_data)
-
-                def save_simulation_results(self, results_data, results_name=None):
-                    name = results_name or datetime.now().strftime("results_%Y_%m_%d_%H_%M")
-                    return self._dump(self.results / f"{name}.json", results_data)
-
-                def save_operator_config(self, config_data, facility_name: str, kind: str = "generic"):
-                    safe = (facility_name or "default").replace(' ', '_')
-                    target = (self.configs / kind)
-                    target.mkdir(parents=True, exist_ok=True)
-                    return self._dump(target / f"{safe}_config.json", config_data)
-
-            return _FallbackManager(base_path)
-    def create_reusable_scenario(self, scenario_name: str):
-        """Create a reusable test scenario from current session"""
-        scenario_data = {
-            'simulation_type': self.session_data.get('overview', {}).get('simulation_type'),
-            'mining_config': self.session_data.get('mining', {}),
-            'processing_config': self.session_data.get('processing', {}),
-            'manufacturing_config': self.session_data.get('manufacturing', {}),
-            'distribution_config': self.session_data.get('distribution', {}),
-            'sales_config': self.session_data.get('sales', {}),
-            'created_date': datetime.now().isoformat(),
-            'description': f"Test scenario: {scenario_name}"
-        }
-        
-        return self.session_manager.save_test_scenario(scenario_data, scenario_name)
-    def save_operator_configs(self):
-        """Save individual configurations for reuse"""
-        configs_saved = []
-        
-        # Save mining config
-        if 'mining' in self.session_data:
-            filename = self.session_manager.save_operator_config(
-                self.session_data['mining'], 
-                self.session_data['mining'].get('facility_name', 'default').replace(' ', '_'),
-                'mining'
-            )
-            configs_saved.append(filename)
-        
-        # Save processing config
-        if 'processing' in self.session_data:
-            filename = self.session_manager.save_operator_config(
-                self.session_data['processing'],
-                self.session_data['processing'].get('facility_name', 'default').replace(' ', '_'),
-                'processing'
-            )
-            configs_saved.append(filename)
-        
-        # Save manufacturing config  
-        if 'manufacturing' in self.session_data:
-            filename = self.session_manager.save_operator_config(
-                self.session_data['manufacturing'],
-                self.session_data['manufacturing'].get('facility_name', 'default').replace(' ', '_'),
-                'manufacturing'
-            )
-            configs_saved.append(filename)
-        
-        return configs_saved
+        return ObsidianAutoSaver(vault_path)
+    
     def clear_screen(self):
         """Clear the terminal screen for better UX"""
         os.system('cls' if os.name == 'nt' else 'clear')
@@ -862,21 +793,33 @@ class InteractiveOperatorInterface:
         self.session_data['decisions_made'].append(log_entry)
     
     def save_session_log(self, filename: str = None):
-        """Save operator session log via the configured session manager.
+        """Save session directly to Obsidian vault only"""
+        # Convert session data to simulation results format for Obsidian
+        simulation_results = {
+            'simulation_id': f"SIM_{datetime.now().strftime('%Y%m%d_%H%M%S')}",
+            'start_time': self.session_data['session_start'],
+            'end_time': datetime.now(),
+            'duration': str(datetime.now() - self.session_data['session_start']),
+            'simulation_config': {
+                'overview': {
+                    'company_name': self.session_data['company_name'],
+                    'operator_name': self.session_data['operator_name'],
+                    'simulation_type': 'Interactive Configuration'
+                }
+            },
+            'operator_decisions': self.session_data['decisions_made'],
+            'final_metrics': {},
+            'material_flow': [],
+            'stages': {}
+        }
 
-        If a filename is provided, its stem is used as the session name, and
-        the manager will handle the extension and destination directory.
-        """
-        session_name = None
-        if filename:
-            try:
-                from pathlib import Path as _P
-                session_name = _P(filename).stem
-            except Exception:
-                session_name = filename
-        saved_path = self.session_manager.save_session_log(self.session_data, session_name)
-        print(f"📁 Session log saved to: {saved_path}")
-        return saved_path
+        # Save only to Obsidian
+        obsidian_notes = self.obsidian_saver.save_simulation_to_vault(simulation_results)
+
+        print(f"📁 Session saved to Obsidian vault: {self.obsidian_saver.vault_path}")
+        print(f"🔍 Open in Obsidian to view your session notes!")
+
+        return obsidian_notes
 
 
 class EnhancedSupplyChainSimulator:
@@ -884,9 +827,9 @@ class EnhancedSupplyChainSimulator:
     Enhanced supply chain simulation system with complete operator interaction
     """
     
-    def __init__(self):
+    def __init__(self, obsidian_vault_path: str = None):
         """Initialize the enhanced simulation system"""
-        self.operator_interface = InteractiveOperatorInterface()
+        self.operator_interface = InteractiveOperatorInterface(obsidian_vault_path)
         self.simulation_config = {}
         self.agents = {}
         self.material_traces = {}
@@ -921,9 +864,12 @@ class EnhancedSupplyChainSimulator:
         # Phase 5: Generate comprehensive results
         final_results = self._generate_final_results(simulation_results)
         
-        # Save session log
-        log_file = self.operator_interface.save_session_log()
-        final_results['session_log_file'] = log_file
+        # Save full results to Obsidian vault
+        try:
+            obsidian_notes = self.operator_interface.obsidian_saver.save_simulation_to_vault(final_results)
+            final_results['obsidian_notes'] = obsidian_notes
+        except Exception as e:
+            logger.exception("Failed to save results to Obsidian vault: %s", e)
         
         return final_results
     
@@ -1509,22 +1455,14 @@ class EnhancedSupplyChainSimulator:
         # Print summary
         self._print_final_summary(simulation_results)
 
-        print(f"\n💾 SAVING SIMULATION DATA")
+        print(f"\n💾 SAVING SIMULATION DATA TO OBSIDIAN")
         print("=" * 40)
-        
-        # Save session log
-        session_log_file = self.operator_interface.save_session_log()
-        simulation_results['session_log_file'] = session_log_file
-        
-        # Save simulation results
-        results_file = self.operator_interface.session_manager.save_simulation_results(
+
+        # Save only to Obsidian vault
+        obsidian_notes = self.operator_interface.obsidian_saver.save_simulation_to_vault(
             simulation_results
         )
-        simulation_results['results_file'] = results_file
-        
-        # Save operator configs for reuse
-        config_files = self.operator_interface.save_operator_configs()
-        simulation_results['config_files'] = config_files
+        simulation_results['obsidian_notes'] = obsidian_notes
         
         # Ask if user wants to save as reusable scenario
         save_scenario = input("Save this configuration as a reusable test scenario? (y/n): ").strip().lower()
@@ -1606,30 +1544,29 @@ class EnhancedSupplyChainSimulator:
 
 
 def main():
-    """Main function to run the enhanced interactive simulation"""
-    
     try:
-        # Create enhanced simulator
-        simulator = EnhancedSupplyChainSimulator()
+        print("🏭 SUPPLY CHAIN SIMULATOR - OBSIDIAN INTEGRATION")
+        print("=" * 60)
+        print("📝 All simulation data will be saved to your Obsidian vault")
+        print("🚫 No local files will be created in the repository")
+        print()
         
-        # Run interactive simulation
+        # Optional: Let user specify vault location
+        vault_choice = input("Use default vault location? (y/n) [y]: ").strip().lower()
+        vault_path = None
+        
+        if vault_choice in ['n', 'no']:
+            custom_path = input("Enter custom Obsidian vault path: ").strip()
+            if custom_path:
+                vault_path = custom_path
+        
+        # Create enhanced simulator with Obsidian-only mode
+        simulator = EnhancedSupplyChainSimulator(vault_path)
         results = simulator.run_interactive_simulation()
-        
-        print(f"\n🎉 SIMULATION COMPLETED SUCCESSFULLY!")
-        print(f"Session Log: {results.get('session_log_file', 'Not saved')}")
-        
-        return results
-        
-    except KeyboardInterrupt:
-        print("\n\n❌ Simulation interrupted by user")
-        print("💾 Saving partial session data...")
-        return None
-    except Exception as e:
-        print(f"\n\n❌ Simulation error: {e}")
-        logger.error(f"Simulation failed: {e}")
-        return None
-
-
+        simulator._print_final_summary(results)
+        print("\n✅ Saved to Obsidian vault.")
+        return 0
+    
 def run_demo_with_prompts():
     """Run a quick demo that shows the operator input prompts"""
     

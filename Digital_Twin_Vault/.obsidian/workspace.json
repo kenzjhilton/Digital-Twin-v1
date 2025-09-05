@@ -11,12 +11,10 @@
             "id": "e83f851206970aba",
             "type": "leaf",
             "state": {
-              "type": "release-notes",
-              "state": {
-                "currentVersion": "1.9.12"
-              },
-              "icon": "lucide-book-up",
-              "title": "Release Notes 1.9.12"
+              "type": "graph",
+              "state": {},
+              "icon": "lucide-git-fork",
+              "title": "Graph view"
             }
           }
         ]
@@ -51,7 +49,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "",
+                "query": "tag:#extraction",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -72,7 +70,8 @@
               "title": "Bookmarks"
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "horizontal",
@@ -165,5 +164,8 @@
     }
   },
   "active": "e83f851206970aba",
-  "lastOpenFiles": []
+  "lastOpenFiles": [
+    "Agents/Mining/Mining Operation - 2025-09-05_16-14-36.md",
+    "Simulation Sessions/Session_2025-09-05_16-14-36.md"
+  ]
 }
